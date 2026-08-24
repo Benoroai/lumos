@@ -1,0 +1,281 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Lumos design tokens
+
+   Brand palette
+     Electric Blue  #1F45FF   primary actions, navigation state
+     Acid Lime      #D7FF2F   availability, success, selection
+     Ink Black      #111111   text and dark surfaces
+     Warm Cream     #F5F0E7   light canvas
+     Sunset Coral   #FF6B4A   warnings, expiry, destructive emphasis
+     Soft Lilac     #E2D6FF   secondary panels, analytics accents
+
+   Restraint is part of the system: a screen leans on one accent, not six.
+   ========================================================================== */
+
+@theme {
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-arabic:
+    var(--font-noto-arabic), var(--font-inter), "Segoe UI", sans-serif;
+
+  --color-brand-blue: #1f45ff;
+  --color-brand-lime: #d7ff2f;
+  --color-brand-ink: #111111;
+  --color-brand-cream: #f5f0e7;
+  --color-brand-coral: #ff6b4a;
+  --color-brand-lilac: #e2d6ff;
+
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --shadow-subtle: 0 1px 2px 0 rgb(17 17 17 / 0.05);
+  --shadow-card:
+    0 1px 3px 0 rgb(17 17 17 / 0.07), 0 1px 2px -1px rgb(17 17 17 / 0.04);
+  --shadow-raised: 0 10px 30px -12px rgb(17 17 17 / 0.18);
+}
+
+:root {
+  color-scheme: light;
+
+  --background: #f5f0e7;
+  --surface: #ffffff;
+  --surface-muted: #faf7f1;
+  --surface-inset: #f0ebe1;
+  --foreground: #111111;
+  --foreground-muted: #5c5a55;
+  --foreground-subtle: #8a8781;
+
+  --border: #e3ddd1;
+  --border-strong: #cdc6b7;
+  --ring: #1f45ff;
+
+  --primary: #1f45ff;
+  --primary-hover: #1737d6;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e8ecff;
+
+  --accent: #d7ff2f;
+  --accent-foreground: #111111;
+  --accent-soft: #f2ffcc;
+
+  --secondary: #e2d6ff;
+  --secondary-foreground: #2c1d5c;
+  --secondary-soft: #f2ecff;
+
+  --success: #1f7a3d;
+  --success-soft: #e6f6ea;
+  --warning: #b45309;
+  --warning-soft: #fdf1e3;
+  --danger: #d13a19;
+  --danger-soft: #ffe9e3;
+  --info: #1f45ff;
+  --info-soft: #e8ecff;
+
+  --chart-1: #1f45ff;
+  --chart-2: #d7ff2f;
+  --chart-3: #ff6b4a;
+  --chart-4: #a78bfa;
+  --chart-5: #0ea5a3;
+  --chart-6: #f59e0b;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: #0c0c0e;
+  --surface: #151518;
+  --surface-muted: #1b1b1f;
+  --surface-inset: #202026;
+  --foreground: #f2efe8;
+  --foreground-muted: #a3a09a;
+  --foreground-subtle: #77746e;
+
+  --border: #2a2a30;
+  --border-strong: #3a3a42;
+  --ring: #5c78ff;
+
+  --primary: #5c78ff;
+  --primary-hover: #7189ff;
+  --primary-foreground: #06070f;
+  --primary-soft: #1a1f3d;
+
+  --accent: #d7ff2f;
+  --accent-foreground: #111111;
+  --accent-soft: #2a3010;
+
+  --secondary: #2e2745;
+  --secondary-foreground: #ded2ff;
+  --secondary-soft: #241f36;
+
+  --success: #4ade80;
+  --success-soft: #12281a;
+  --warning: #fbbf24;
+  --warning-soft: #2c2109;
+  --danger: #ff8a6b;
+  --danger-soft: #331410;
+  --info: #5c78ff;
+  --info-soft: #1a1f3d;
+
+  --chart-1: #5c78ff;
+  --chart-2: #d7ff2f;
+  --chart-3: #ff8a6b;
+  --chart-4: #c4b5fd;
+  --chart-5: #2dd4bf;
+  --chart-6: #fbbf24;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-inset: var(--surface-inset);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-soft: var(--secondary-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Arabic and Persian read better with slightly more line height. */
+  [dir="rtl"] body {
+    font-family: var(--font-arabic);
+    line-height: 1.75;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  /* Numbers in tables should line up regardless of locale digits. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .surface-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Logical properties keep every layout correct under RTL without mirrored CSS. */
+  .ms-auto {
+    margin-inline-start: auto;
+  }
+  .me-auto {
+    margin-inline-end: auto;
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--surface-inset) 25%,
+      var(--surface-muted) 37%,
+      var(--surface-inset) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0 50%;
+    }
+  }
+
+  .animate-in-up {
+    animation: in-up 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes in-up {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

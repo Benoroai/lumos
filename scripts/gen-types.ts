@@ -1,0 +1,277 @@
+/**
+ * Generates `src/lib/types/database.generated.ts` by introspecting a live
+ * database. Keeping types derived from the actual schema means a migration can
+ * never silently drift away from the TypeScript the app is compiled against.
+ *
+ *   DATABASE_URL=... npm run db:types
+ */
+import { writeFileSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+import { connect, requireEnv } from "./lib/db";
+
+const OUT = resolve(process.cwd(), "src/lib/types/database.generated.ts");
+
+const SCALARS: Record<string, string> = {
+  uuid: "string",
+  text: "string",
+  varchar: "string",
+  bpchar: "string",
+  inet: "string",
+  citext: "string",
+  bool: "boolean",
+  int2: "number",
+  int4: "number",
+  int8: "number",
+  float4: "number",
+  float8: "number",
+  numeric: "number",
+  json: "Json",
+  jsonb: "Json",
+  date: "string",
+  time: "string",
+  timetz: "string",
+  timestamp: "string",
+  timestamptz: "string",
+};
+
+type Column = {
+  table_name: string;
+  column_name: string;
+  udt_name: string;
+  is_nullable: "YES" | "NO";
+  has_default: boolean;
+  is_identity: "YES" | "NO";
+  is_generated: boolean;
+  is_array: boolean;
+  enum_name: string | null;
+};
+
+function tsType(col: Column, enums: Map<string, string[]>): string {
+  const base = enums.has(col.udt_name.replace(/^_/, ""))
+    ? enumTypeName(col.udt_name.replace(/^_/, ""))
+    : (SCALARS[col.udt_name.replace(/^_/, "")] ?? "unknown");
+  return col.is_array ? `${base}[]` : base;
+}
+
+function enumTypeName(name: string): string {
+  return name
+    .split("_")
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join("");
+}
+
+function pascal(name: string): string {
+  return name
+    .split("_")
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join("");
+}
+
+async function main() {
+  const client = await connect(requireEnv("DATABASE_URL"));
+  try {
+    const { rows: enumRows } = await client.query<{
+      name: string;
+      labels: string[];
+    }>(`
+      select t.typname as name, array_agg(e.enumlabel::text order by e.enumsortorder) as labels
+      from pg_type t
+      join pg_enum e on e.enumtypid = t.oid
+      join pg_namespace n on n.oid = t.typnamespace
+      where n.nspname = 'app'
+      group by t.typname
+      order by t.typname
+    `);
+    const enums = new Map(enumRows.map((r) => [r.name, r.labels]));
+
+    const { rows: cols } = await client.query<Column>(`
+      select
+        c.table_name,
+        c.column_name,
+        c.udt_name,
+        c.is_nullable,
+        (c.column_default is not null) as has_default,
+        c.is_identity,
+        (c.is_generated = 'ALWAYS') as is_generated,
+        (c.data_type = 'ARRAY') as is_array,
+        null::text as enum_name
+      from information_schema.columns c
+      join information_schema.tables t
+        on t.table_name = c.table_name and t.table_schema = c.table_schema
+      where c.table_schema = 'public'
+        and t.table_type = 'BASE TABLE'
+        and c.table_name not like '\\_%'
+      order by c.table_name, c.ordinal_position
+    `);
+
+    // Foreign keys are what supabase-js uses to type embedded selects
+    // (`categories:category_id ( ... )`). Without them every join resolves to
+    // `never`, so they are generated rather than hand-maintained.
+    const { rows: fks } = await client.query<{
+      constraint_name: string;
+      table_name: string;
+      column_name: string;
+      referenced_table: string;
+      referenced_column: string;
+      is_unique: boolean;
+    }>(`
+      select
+        con.conname as constraint_name,
+        rel.relname as table_name,
+        att.attname as column_name,
+        frel.relname as referenced_table,
+        fatt.attname as referenced_column,
+        exists (
+          select 1 from pg_index i
+          where i.indrelid = con.conrelid
+            and i.indisunique
+            and i.indnatts = 1
+            and i.indkey[0] = con.conkey[1]
+        ) as is_unique
+      from pg_constraint con
+      join pg_class rel on rel.oid = con.conrelid
+      join pg_namespace nsp on nsp.oid = rel.relnamespace
+      join pg_class frel on frel.oid = con.confrelid
+      join pg_attribute att on att.attrelid = con.conrelid and att.attnum = con.conkey[1]
+      join pg_attribute fatt on fatt.attrelid = con.confrelid and fatt.attnum = con.confkey[1]
+      where con.contype = 'f'
+        and nsp.nspname = 'public'
+        and array_length(con.conkey, 1) = 1
+      order by rel.relname, con.conname
+    `);
+
+    const fksByTable = new Map<string, typeof fks>();
+    for (const fk of fks) {
+      const list = fksByTable.get(fk.table_name) ?? [];
+      list.push(fk);
+      fksByTable.set(fk.table_name, list);
+    }
+
+    const byTable = new Map<string, Column[]>();
+    for (const col of cols) {
+      const list = byTable.get(col.table_name) ?? [];
+      list.push(col);
+      byTable.set(col.table_name, list);
+    }
+
+    const lines: string[] = [
+      "// AUTO-GENERATED by `npm run db:types`. Do not edit by hand.",
+      "// Source of truth: supabase/migrations/*.sql",
+      "",
+      "export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];",
+      "",
+    ];
+
+    for (const [name, labels] of enums) {
+      lines.push(
+        `export type ${enumTypeName(name)} = ${labels.map((l) => `'${l}'`).join(" | ")};`,
+      );
+    }
+    lines.push("", "export type Database = {", "  public: {", "    Tables: {");
+
+    for (const [table, columns] of [...byTable].sort(([a], [b]) =>
+      a.localeCompare(b),
+    )) {
+      lines.push(`      ${table}: {`);
+      lines.push("        Row: {");
+      for (const col of columns) {
+        const nullable = col.is_nullable === "YES" ? " | null" : "";
+        lines.push(
+          `          ${col.column_name}: ${tsType(col, enums)}${nullable};`,
+        );
+      }
+      lines.push("        };");
+
+      lines.push("        Insert: {");
+      for (const col of columns) {
+        const optional =
+          col.has_default ||
+          col.is_nullable === "YES" ||
+          col.is_identity === "YES" ||
+          col.is_generated;
+        const nullable = col.is_nullable === "YES" ? " | null" : "";
+        lines.push(
+          `          ${col.column_name}${optional ? "?" : ""}: ${tsType(col, enums)}${nullable};`,
+        );
+      }
+      lines.push("        };");
+
+      lines.push("        Update: {");
+      for (const col of columns) {
+        const nullable = col.is_nullable === "YES" ? " | null" : "";
+        lines.push(
+          `          ${col.column_name}?: ${tsType(col, enums)}${nullable};`,
+        );
+      }
+      lines.push("        };");
+      const relationships = fksByTable.get(table) ?? [];
+      if (relationships.length === 0) {
+        lines.push("        Relationships: [];");
+      } else {
+        lines.push("        Relationships: [");
+        for (const fk of relationships) {
+          lines.push("          {");
+          lines.push(`            foreignKeyName: '${fk.constraint_name}';`);
+          lines.push(`            columns: ['${fk.column_name}'];`);
+          lines.push(`            isOneToOne: ${fk.is_unique};`);
+          lines.push(
+            `            referencedRelation: '${fk.referenced_table}';`,
+          );
+          lines.push(
+            `            referencedColumns: ['${fk.referenced_column}'];`,
+          );
+          lines.push("          },");
+        }
+        lines.push("        ];");
+      }
+      lines.push("      };");
+    }
+
+    lines.push(
+      "    };",
+      "    Views: Record<string, never>;",
+      "    Functions: Record<string, never>;",
+    );
+    lines.push("    Enums: {");
+    for (const [name, labels] of enums) {
+      lines.push(`      ${name}: ${labels.map((l) => `'${l}'`).join(" | ")};`);
+    }
+    lines.push(
+      "    };",
+      "    CompositeTypes: Record<string, never>;",
+      "  };",
+      "};",
+      "",
+    );
+
+    lines.push(
+      'export type Tables<T extends keyof Database["public"]["Tables"]> =',
+    );
+    lines.push('  Database["public"]["Tables"][T]["Row"];');
+    lines.push(
+      'export type TablesInsert<T extends keyof Database["public"]["Tables"]> =',
+    );
+    lines.push('  Database["public"]["Tables"][T]["Insert"];');
+    lines.push(
+      'export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =',
+    );
+    lines.push('  Database["public"]["Tables"][T]["Update"];');
+    lines.push("");
+
+    for (const table of [...byTable.keys()].sort()) {
+      lines.push(`export type ${pascal(table)}Row = Tables<'${table}'>;`);
+    }
+    lines.push("");
+
+    mkdirSync(resolve(process.cwd(), "src/lib/types"), { recursive: true });
+    writeFileSync(OUT, lines.join("\n"), "utf8");
+    console.log(`Wrote ${OUT} (${byTable.size} tables, ${enums.size} enums).`);
+  } finally {
+    await client.end();
+  }
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

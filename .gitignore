@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Test and tooling output
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Local environment files (keep the documented template)
+.env
+.env.*
+!.env.example
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS and editor metadata
+.DS_Store
+__MACOSX/
+.idea/
+.vscode/
+
