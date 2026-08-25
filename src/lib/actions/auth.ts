@@ -87,10 +87,8 @@ export async function signInAction(
     return actionError("Email or password is incorrect.");
   }
 
-  const admin = createAdminSupabase();
-
   if (portal === "platform") {
-    const { data: platformUser } = await admin
+    const { data: platformUser } = await supabase
       .from("platform_users")
       .select("id, is_active, must_change_password, deleted_at")
       .eq("user_id", data.user.id)
@@ -108,7 +106,7 @@ export async function signInAction(
       return actionError("Email or password is incorrect.");
     }
 
-    await admin
+    await supabase
       .from("platform_users")
       .update({ last_login_at: new Date().toISOString() })
       .eq("id", platformUser.id);
@@ -127,7 +125,7 @@ export async function signInAction(
     });
   }
 
-  const { data: membership } = await admin
+  const { data: membership } = await supabase
     .from("tenant_users")
     .select(
       "id, tenant_id, status, must_change_password, deleted_at, tenants:tenant_id ( account_status, deleted_at )",
@@ -155,7 +153,7 @@ export async function signInAction(
     return actionError("Email or password is incorrect.");
   }
 
-  await admin
+  await supabase
     .from("tenant_users")
     .update({ last_login_at: new Date().toISOString() })
     .eq("id", membership.id);
