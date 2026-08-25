@@ -21,8 +21,18 @@ export type ImpersonationClaim = {
   startedAt: string;
 };
 
+function signingKey(): string {
+  const key = serverEnv().SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is required for support impersonation.",
+    );
+  }
+  return key;
+}
+
 function sign(payload: string): string {
-  return createHmac("sha256", serverEnv().SUPABASE_SERVICE_ROLE_KEY)
+  return createHmac("sha256", signingKey())
     .update(payload)
     .digest("base64url");
 }
