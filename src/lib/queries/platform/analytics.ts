@@ -47,16 +47,16 @@ export async function getPlatformOverview(): Promise<PlatformOverview> {
 
   const [tenantsResult, subscriptionsResult, platformUsersResult] =
     await Promise.all([
-      admin
+      supabase
         .from("tenants")
         .select("id, name, slug, business_type, account_status, created_at")
         .is("deleted_at", null)
         .order("created_at", { ascending: false }),
-      admin
+      supabase
         .from("subscriptions")
         .select("tenant_id, status, expires_at, plans:plan_id ( code, name )")
         .eq("is_current", true),
-      admin
+      supabase
         .from("platform_users")
         .select("id", { count: "exact", head: true })
         .is("deleted_at", null),
@@ -161,7 +161,7 @@ async function countAll(
   table: "branches" | "categories" | "items" | "offers",
 ): Promise<number> {
   const supabase = await createServerSupabase();
-  const { count } = await admin
+  const { count } = await supabase
     .from(table)
     .select("id", { count: "exact", head: true })
     .is("deleted_at", null);
@@ -197,7 +197,7 @@ export async function listAuditLogs(options: {
   const supabase = await createServerSupabase();
   const rangeFrom = (options.page - 1) * options.pageSize;
 
-  let query = admin
+  let query = supabase
     .from("audit_logs")
     .select("*, tenants:tenant_id ( name )", { count: "exact" })
     .order("created_at", { ascending: false })
