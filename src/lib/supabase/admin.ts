@@ -20,9 +20,16 @@ let cached: ReturnType<typeof createClient<Database>> | null = null;
  */
 export function createAdminSupabase() {
   const env = serverEnv();
+  const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is required for this privileged operation.",
+    );
+  }
+
   cached ??= createClient<Database>(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY,
+    serviceRoleKey,
     {
       auth: { persistSession: false, autoRefreshToken: false },
       global: { headers: { "X-Client-Info": "lumos-admin" } },
