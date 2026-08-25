@@ -1,18 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import {
-  Building2,
-  CalendarClock,
-  ChartNoAxesCombined,
-  FileClock,
-  Flag,
-  Gauge,
-  Globe,
-  LayoutTemplate,
-  Settings,
-  Sparkles,
-  UsersRound,
-} from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { AppShell, type NavSection } from "@/components/layout/app-shell";
 import {
   CommandPalette,
@@ -26,17 +14,17 @@ import { getPlatformOverview } from "@/lib/queries/platform/analytics";
 const NAV: NavSection[] = [
   {
     items: [
-      { href: "/admin", label: "Overview", icon: Gauge, exact: true },
-      { href: "/admin/businesses", label: "Businesses", icon: Building2 },
+      { href: "/admin", label: "Overview", icon: "Gauge", exact: true },
+      { href: "/admin/businesses", label: "Businesses", icon: "Building2" },
       {
         href: "/admin/subscriptions",
         label: "Subscriptions",
-        icon: CalendarClock,
+        icon: "CalendarClock",
       },
       {
         href: "/admin/analytics",
         label: "Platform analytics",
-        icon: ChartNoAxesCombined,
+        icon: "ChartNoAxesCombined",
       },
     ],
   },
@@ -46,15 +34,15 @@ const NAV: NavSection[] = [
       {
         href: "/admin/templates",
         label: "Business types",
-        icon: LayoutTemplate,
+        icon: "LayoutTemplate",
       },
-      { href: "/admin/plans", label: "Plans and limits", icon: Sparkles },
+      { href: "/admin/plans", label: "Plans and limits", icon: "Sparkles" },
       {
         href: "/admin/languages",
         label: "Languages and currencies",
-        icon: Globe,
+        icon: "Globe",
       },
-      { href: "/admin/feature-flags", label: "Feature flags", icon: Flag },
+      { href: "/admin/feature-flags", label: "Feature flags", icon: "Flag" },
     ],
   },
   {
@@ -63,10 +51,10 @@ const NAV: NavSection[] = [
       {
         href: "/admin/platform-users",
         label: "Platform users",
-        icon: UsersRound,
+        icon: "UsersRound",
       },
-      { href: "/admin/audit", label: "Audit logs", icon: FileClock },
-      { href: "/admin/settings", label: "System settings", icon: Settings },
+      { href: "/admin/audit", label: "Audit logs", icon: "FileClock" },
+      { href: "/admin/settings", label: "System settings", icon: "Settings" },
     ],
   },
 ];
