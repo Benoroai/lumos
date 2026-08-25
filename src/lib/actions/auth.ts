@@ -142,6 +142,35 @@ export async function signInAction(
   } | null;
 
   if (!membership || !tenant || tenant.deleted_at) {
+    // A platform operator may arrive through the generic business sign-in URL.
+    // The password has already been verified, so route the authenticated user
+    // to the correct portal instead of presenting a misleading credentials error.
+    const { data: platformUser } = await supabase
+      .from("platform_users")
+      .select("id, is_active, must_change_password, deleted_at")
+      .eq("user_id", data.user.id)
+      .maybeSingle();
+
+    if (platformUser?.is_active && !platformUser.deleted_at) {
+      await supabase
+        .from("platform_users")
+        .update({ last_login_at: new Date().toISOString() })
+        .eq("id", platformUser.id);
+
+      await writeLoginAudit({
+        email,
+        portal: "platform",
+        wasSuccessful: true,
+        userId: data.user.id,
+      });
+
+      return actionOk({
+        redirectTo: platformUser.must_change_password
+          ? "/admin/change-password"
+          : "/admin",
+      });
+    }
+
     await supabase.auth.signOut();
     await writeLoginAudit({
       email,
