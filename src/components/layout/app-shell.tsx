@@ -3,14 +3,65 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, type LucideIcon } from "lucide-react";
+import {
+  BarChart3,
+  Boxes,
+  Building,
+  Building2,
+  CalendarClock,
+  ChartNoAxesCombined,
+  FileClock,
+  Flag,
+  Gauge,
+  Globe,
+  Image as ImageIcon,
+  Languages,
+  LayoutList,
+  LayoutTemplate,
+  Menu,
+  Palette,
+  Plug,
+  Settings,
+  Sparkles,
+  Tag,
+  Ticket,
+  UsersRound,
+  X,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+
+const NAV_ICONS = {
+  BarChart3,
+  Boxes,
+  Building,
+  Building2,
+  CalendarClock,
+  ChartNoAxesCombined,
+  FileClock,
+  Flag,
+  Gauge,
+  Globe,
+  ImageIcon,
+  Languages,
+  LayoutList,
+  LayoutTemplate,
+  Palette,
+  Plug,
+  Settings,
+  Sparkles,
+  Tag,
+  Ticket,
+  UsersRound,
+  Zap,
+} satisfies Record<string, LucideIcon>;
 
 export type NavItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: keyof typeof NAV_ICONS;
   badge?: string | number;
   exact?: boolean;
 };
@@ -80,7 +131,7 @@ export function AppShell({
                     ? pathname === item.href
                     : pathname === item.href ||
                       pathname.startsWith(`${item.href}/`);
-                  const Icon = item.icon;
+                  const Icon = NAV_ICONS[item.icon];
 
                   return (
                     <Link
