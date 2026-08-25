@@ -1,22 +1,5 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import {
-  BarChart3,
-  Boxes,
-  Building,
-  Gauge,
-  Image as ImageIcon,
-  Languages,
-  LayoutList,
-  Palette,
-  Plug,
-  Settings,
-  Sparkles,
-  Tag,
-  Ticket,
-  UsersRound,
-  Zap,
-} from "lucide-react";
 import { AppShell, type NavSection } from "@/components/layout/app-shell";
 import {
   CommandPalette,
@@ -65,7 +48,7 @@ export default async function DashboardLayout({
   const sections: NavSection[] = [
     {
       items: [
-        { href: "/dashboard", label: "Overview", icon: Gauge, exact: true },
+        { href: "/dashboard", label: "Overview", icon: "Gauge", exact: true },
       ],
     },
     {
@@ -76,7 +59,7 @@ export default async function DashboardLayout({
               {
                 href: "/dashboard/catalog/categories",
                 label: words.categories,
-                icon: LayoutList,
+                icon: "LayoutList",
               },
             ]
           : []),
@@ -85,7 +68,7 @@ export default async function DashboardLayout({
               {
                 href: "/dashboard/catalog/items",
                 label: words.items,
-                icon: Tag,
+                icon: "Tag",
               },
             ]
           : []),
@@ -94,7 +77,7 @@ export default async function DashboardLayout({
               {
                 href: "/dashboard/catalog/availability",
                 label: "Quick 86",
-                icon: Zap,
+                icon: "Zap",
               },
             ]
           : []),
@@ -103,12 +86,12 @@ export default async function DashboardLayout({
               {
                 href: "/dashboard/catalog/modifiers",
                 label: "Modifiers",
-                icon: Boxes,
+                icon: "Boxes",
               },
             ]
           : []),
         ...(can(PERMISSIONS.offersView)
-          ? [{ href: "/dashboard/offers", label: "Offers", icon: Ticket }]
+          ? [{ href: "/dashboard/offers", label: "Offers", icon: "Ticket" }]
           : []),
       ],
     },
@@ -116,17 +99,17 @@ export default async function DashboardLayout({
       label: "Business",
       items: [
         ...(can(PERMISSIONS.branchesView)
-          ? [{ href: "/dashboard/branches", label: "Branches", icon: Building }]
+          ? [{ href: "/dashboard/branches", label: "Branches", icon: "Building" }]
           : []),
         ...(can(PERMISSIONS.mediaView)
-          ? [{ href: "/dashboard/media", label: "Media", icon: ImageIcon }]
+          ? [{ href: "/dashboard/media", label: "Media", icon: "ImageIcon" }]
           : []),
         ...(can(PERMISSIONS.translationsView)
           ? [
               {
                 href: "/dashboard/translations",
                 label: "Translations",
-                icon: Languages,
+                icon: "Languages",
               },
             ]
           : []),
@@ -135,12 +118,12 @@ export default async function DashboardLayout({
               {
                 href: "/dashboard/analytics",
                 label: "Analytics",
-                icon: BarChart3,
+                icon: "BarChart3",
               },
             ]
           : []),
         ...(can(PERMISSIONS.staffView)
-          ? [{ href: "/dashboard/staff", label: "Staff", icon: UsersRound }]
+          ? [{ href: "/dashboard/staff", label: "Staff", icon: "UsersRound" }]
           : []),
       ],
     },
@@ -149,11 +132,11 @@ export default async function DashboardLayout({
       items: [
         ...(can(PERMISSIONS.brandingManage)
           ? [
-              { href: "/dashboard/branding", label: "Branding", icon: Palette },
+              { href: "/dashboard/branding", label: "Branding", icon: "Palette" },
               {
                 href: "/dashboard/localization",
                 label: "Localization",
-                icon: Languages,
+                icon: "Languages",
               },
             ]
           : []),
@@ -162,7 +145,7 @@ export default async function DashboardLayout({
               {
                 href: "/dashboard/integration",
                 label: "Integration / API",
-                icon: Plug,
+                icon: "Plug",
               },
             ]
           : []),
@@ -171,12 +154,12 @@ export default async function DashboardLayout({
               {
                 href: "/dashboard/subscription",
                 label: "Subscription",
-                icon: Sparkles,
+                icon: "Sparkles",
               },
             ]
           : []),
         ...(can(PERMISSIONS.settingsView)
-          ? [{ href: "/dashboard/settings", label: "Settings", icon: Settings }]
+          ? [{ href: "/dashboard/settings", label: "Settings", icon: "Settings" }]
           : []),
       ],
     },
