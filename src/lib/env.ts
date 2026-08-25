@@ -60,7 +60,7 @@ export const publicEnv = parsedPublic.success
     } satisfies z.infer<typeof publicSchema>);
 
 const serverSchema = z.object({
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   SUPABASE_STORAGE_BUCKET: z.string().min(1).default("tenant-media"),
   MEDIA_MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(5_242_880),
   PUBLIC_API_CORS_ORIGINS: z.string().default(""),
