@@ -223,7 +223,7 @@ async function buildImpersonatedSession(
   startedAt: string,
 ): Promise<TenantSession | null> {
   const supabase = await createServerSupabase();
-  const { data: tenantRow } = await admin
+  const { data: tenantRow } = await supabase
     .from("tenants")
     .select(
       "id, slug, name, business_type, template_id, logo_url, default_locale, supported_locales, default_currency, timezone, account_status, deleted_at",
@@ -233,7 +233,7 @@ async function buildImpersonatedSession(
 
   if (!tenantRow || tenantRow.deleted_at) return null;
 
-  const { data: permissionRows } = await admin
+  const { data: permissionRows } = await supabase
     .from("permissions")
     .select("key");
 
@@ -291,7 +291,7 @@ async function loadSubscription(
   tenantId: string,
 ): Promise<TenantSession["subscription"]> {
   const supabase = await createServerSupabase();
-  const { data } = await admin
+  const { data } = await supabase
     .from("subscriptions")
     .select("id, status, starts_at, expires_at, plans:plan_id ( code, name )")
     .eq("tenant_id", tenantId)
