@@ -4,7 +4,6 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { createAdminSupabase } from "@/lib/supabase/admin";
 import type { PermissionKey, PlatformRoleCode } from "@/lib/permissions";
 import type {
   AccountStatus,
@@ -223,7 +222,7 @@ async function buildImpersonatedSession(
   tenantId: string,
   startedAt: string,
 ): Promise<TenantSession | null> {
-  const admin = createAdminSupabase();
+  const supabase = await createServerSupabase();
   const { data: tenantRow } = await admin
     .from("tenants")
     .select(
@@ -291,7 +290,7 @@ async function loadPermissions(
 async function loadSubscription(
   tenantId: string,
 ): Promise<TenantSession["subscription"]> {
-  const admin = createAdminSupabase();
+  const supabase = await createServerSupabase();
   const { data } = await admin
     .from("subscriptions")
     .select("id, status, starts_at, expires_at, plans:plan_id ( code, name )")
