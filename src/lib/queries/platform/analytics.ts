@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createAdminSupabase } from "@/lib/supabase/admin";
+import { createServerSupabase } from "@/lib/supabase/server";
 import { deriveSubscriptionStatus } from "@/lib/subscriptions";
 import type { BusinessType, SubscriptionStatus } from "@/lib/types/app";
 
@@ -38,11 +38,12 @@ export type PlatformOverview = {
 
 /**
  * Platform-wide totals. This is the one place in the product that is
- * legitimately cross-tenant, so it runs through the service role — and it only
- * ever aggregates. No tenant's individual analytics are exposed here.
+ * legitimately cross-tenant. The signed-in platform operator is authorized by
+ * RLS, and this function only aggregates. No tenant's individual analytics are
+ * exposed here.
  */
 export async function getPlatformOverview(): Promise<PlatformOverview> {
-  const admin = createAdminSupabase();
+  const supabase = await createServerSupabase();
 
   const [tenantsResult, subscriptionsResult, platformUsersResult] =
     await Promise.all([
@@ -159,7 +160,7 @@ export async function getPlatformOverview(): Promise<PlatformOverview> {
 async function countAll(
   table: "branches" | "categories" | "items" | "offers",
 ): Promise<number> {
-  const admin = createAdminSupabase();
+  const supabase = await createServerSupabase();
   const { count } = await admin
     .from(table)
     .select("id", { count: "exact", head: true })
@@ -193,7 +194,7 @@ export async function listAuditLogs(options: {
   from?: string | undefined;
   to?: string | undefined;
 }): Promise<{ rows: AuditLogRow[]; total: number; pageCount: number }> {
-  const admin = createAdminSupabase();
+  const supabase = await createServerSupabase();
   const rangeFrom = (options.page - 1) * options.pageSize;
 
   let query = admin
